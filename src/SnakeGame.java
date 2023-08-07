@@ -6,6 +6,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.LinkedList;
 
 public class SnakeGame extends JPanel implements KeyListener, ActionListener {
     private final int TILE_SIZE = 20;
@@ -35,17 +36,6 @@ public class SnakeGame extends JPanel implements KeyListener, ActionListener {
 
         timer = new Timer(delay, this);
         timer.start();
-    }
-
-    private void spawnFood() {
-        Random random = new Random();
-        int x, y;
-        do {
-            x = random.nextInt(BOARD_SIZE);
-            y = random.nextInt(BOARD_SIZE);
-        } while (snake.contains(new Point(x, y)));
-
-        food = new Point(x, y);
     }
 
     private void drawTile(Graphics g, int x, int y, Color color) {
@@ -93,6 +83,55 @@ public class SnakeGame extends JPanel implements KeyListener, ActionListener {
         g.drawString("Score: " + score, 10, 30);
     }
 
+    private void move() {
+        int dx = 0;
+        int dy = 0;
+
+        switch (direction) {
+            case 'U':
+                dy = -1;
+                break;
+            case 'D':
+                dy = 1;
+                break;
+            case 'L':
+                dx = -1;
+                break;
+            case 'R':
+                dx = 1;
+                break;
+        }
+
+        Point head = snake.get(0);
+        Point newHead = new Point(head.x + dx, head.y + dy);
+
+        if (newHead.equals(food)) {
+            snake.add(0, newHead);
+            spawnFood();
+            score += 10;
+            if (score % 50 == 0) {
+                delay -= 10; // Increase difficulty every 50 points
+                timer.setDelay(delay);
+            }
+        } else {
+            snake.add(0, newHead);
+            snake.remove(snake.size() - 1);
+        }
+    }
+
+    private void spawnFood() {
+        Random random = new Random();
+        int x, y;
+        do {
+            x = random.nextInt(BOARD_SIZE);
+            y = random.nextInt(BOARD_SIZE);
+        } while (snake.contains(new Point(x, y)));
+
+        food = new Point(x, y);
+    }
+
+
+
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -130,7 +169,17 @@ public class SnakeGame extends JPanel implements KeyListener, ActionListener {
 
     @Override
     public void keyPressed(KeyEvent e) {
+        int key = e.getKeyCode();
 
+        if ((key == KeyEvent.VK_UP || key == KeyEvent.VK_W) && direction != 'D') {
+            direction = 'U';
+        } else if ((key == KeyEvent.VK_DOWN || key == KeyEvent.VK_S) && direction != 'U') {
+            direction = 'D';
+        } else if ((key == KeyEvent.VK_LEFT || key == KeyEvent.VK_A) && direction != 'R') {
+            direction = 'L';
+        } else if ((key == KeyEvent.VK_RIGHT || key == KeyEvent.VK_D) && direction != 'L') {
+            direction = 'R';
+        }
     }
 
     @Override
