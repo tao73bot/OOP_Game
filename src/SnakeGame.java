@@ -6,11 +6,10 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.LinkedList;
 
 public class SnakeGame extends JPanel implements KeyListener, ActionListener {
     private final int TILE_SIZE = 20;
-    private final int BOARD_SIZE = 20;
+    private final int BOARD_SIZE = 40;
     private ArrayList<Point> snake;
     private Point food;
     private char direction;
@@ -26,8 +25,8 @@ public class SnakeGame extends JPanel implements KeyListener, ActionListener {
         addKeyListener(this);
 
         snake = new ArrayList<>();
-        snake.add(new Point(10, 10)); // Initial position of the snake
-        direction = 'R'; // Start moving to the right
+        snake.add(new Point(10, 10));
+        direction = 'R';
         gameOver = false;
         score = 0;
         delay = 200;
@@ -46,7 +45,7 @@ public class SnakeGame extends JPanel implements KeyListener, ActionListener {
     private void drawSnake(Graphics g) {
         for (int i = 0; i < snake.size(); i++) {
             Point p = snake.get(i);
-            Color color = (i == 0) ? Color.GREEN : Color.YELLOW; // Head is green, body is yellow
+            Color color = (i == 0) ? Color.BLUE : Color.YELLOW; // Head is green, body is yellow
             drawTile(g, p.x, p.y, color);
             // Draw eyes on the snake's head
             if (i == 0) {
@@ -109,7 +108,7 @@ public class SnakeGame extends JPanel implements KeyListener, ActionListener {
             snake.add(0, newHead);
             spawnFood();
             score += 10;
-            if (score % 50 == 0) {
+            if (score % 100 == 0) {
                 delay -= 10; // Increase difficulty every 50 points
                 timer.setDelay(delay);
             }
@@ -130,6 +129,21 @@ public class SnakeGame extends JPanel implements KeyListener, ActionListener {
         food = new Point(x, y);
     }
 
+    private boolean isGameOver() {
+        Point head = snake.get(0);
+
+        // Check if the snake has collided with itself or the wall
+        if (head.x < 0 || head.x >= BOARD_SIZE || head.y < 0 || head.y >= BOARD_SIZE) {
+            return true;
+        }
+        for (int i = 1; i < snake.size(); i++) {
+            if (snake.get(i).equals(head)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
 
     @Override
@@ -159,7 +173,11 @@ public class SnakeGame extends JPanel implements KeyListener, ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-
+        if (!gameOver) {
+            move();
+            gameOver = isGameOver();
+            repaint();
+        }
     }
 
     @Override
